@@ -8,3 +8,365 @@ Keperluan tugas laboratorium Sistem Operasi 2019
 </center>
 
 ---
+
+## NO 1
+
+Buatlah program C yang bisa menghitung faktorial secara parallel lalu menampilkan hasilnya secara berurutan  
+Contoh:  
+	./faktorial 5 3 4  
+	3! = 6  
+	4! = 24  
+	5! = 120
+
+**Jawaban**
+
+1. Buat program dibawah ini dengan nama file soal1.c di folder yang ditentukan.
+
+```c
+#include <stdio.h>
+#include <unistd.h>
+#include <pthread.h>
+#include <stdlib.h>
+#define llu unsigned long long
+
+pthread_t tid[50];
+llu result[50] = {0};
+
+void* fact_dp(void* arv);
+
+int main(int argc, char* argv[])
+{
+    //invalid cmd argument
+    if (argc <2)
+    {
+        printf("minimal satu argumen\n");
+        exit(1);
+    }
+    //processing factorial by threading
+    int flag[50] = {0};
+    int c=0;
+    int* arg=malloc(sizeof(int*));
+    while(argc>1)
+    {
+        *arg=(atoi(argv[c+1]));
+        pthread_create(&tid[c],NULL,fact_dp,(void*)arg);
+        flag[*arg]=1;
+        argc--;
+        c++;
+        pthread_join(tid[c-1],NULL);
+        //join until any thread eliminate
+    }
+    int l=0;
+    //display the output from array sort asc
+    while(l<50)
+    {
+        if (flag[l] != 0)
+            printf("%d! = %llu\n",l,result[l]);
+        l++;
+    }
+    return 0;
+}
+
+void* fact_dp(void* arv)
+{
+    int *n = (int*)arv;
+    // printf("n=%d\n",*n);
+    if (*n >= 0) 
+    {
+        if (result[*n] != 0)
+            return NULL;
+        else
+        {
+            result[0] = 1;
+            for (int i = 1; i <= *n; ++i) 
+                result[i] = i * result[i - 1];
+            return NULL;
+        }
+    }
+}
+```
+Penjelasan:
+```c
+void* fact_dp(void* arv)
+{
+    int *n = (int*)arv;
+    // printf("n=%d\n",*n);
+    if (*n >= 0) 
+    {
+        if (result[*n] != 0)
+            return NULL;
+        else
+        {
+            result[0] = 1;
+            for (int i = 1; i <= *n; ++i) 
+                result[i] = i * result[i - 1];
+            return NULL;
+        }
+    }
+}
+```
+Fungsi untuk mencari bilangan factorial dari argumen tipe data arv yang akan di type cast menjadi pointer integer dengan konsep pemrograman dinamis.
+```c
+//invalid cmd argument
+if (argc <2)
+{
+    printf("minimal satu argumen\n");
+    exit(1);
+}
+```
+invalid handling argumen command line yang membutuhkan minimal satu argumen
+```c
+//processing factorial by threading
+int flag[50] = {0};
+int c=0;
+int* arg=malloc(sizeof(int*));
+while(argc>1)
+{
+    *arg=(atoi(argv[c+1]));
+    pthread_create(&tid[c],NULL,fact_dp,(void*)arg);
+    flag[*arg]=1;
+    argc--;
+    c++;
+    pthread_join(tid[c-1],NULL);
+    //join until any thread eliminate
+}
+```
+Array integer flag guna menandai bilangan apa saja yang telah dipassing sebagai argumen ke program. While loop berguna untuk melakukan threading program menghitung nilai factorial suatu argumen kemudian dilanjutkan dengan menunggu threading itu mati.
+```c
+int l=0;
+//display the output from array sort asc
+while(l<50)
+{
+    if (flag[l] != 0)
+        printf("%d! = %llu\n",l,result[l]);
+    l++;
+}
+return 0;
+```
+While loop untuk menampilkan hasil output sesuai soal berdasarkan tanda array flag.
+
+2. Lalu compile file tadi dengan `-pthread` dan jalankan di terminal
+
+3. Lakukan simulasi test. Hasil akhir bisa dicek di terminal.
+
+---
+
+## NO 2
+
+Pada suatu hari ada orang yang ingin berjualan 1 jenis barang secara private, dia memintamu membuat program C dengan spesifikasi sebagai berikut:  
+1. Terdapat 2 server: server penjual dan server pembeli
+2.	1 server hanya bisa terkoneksi dengan 1 client
+3.	Server penjual dan server pembeli memiliki stok barang yang selalu sama
+4.	Client yang terkoneksi ke server penjual hanya bisa menambah stok
+    - Cara menambah stok: client yang terkoneksi ke server penjual mengirim string “tambah” ke server lalu stok bertambah 1
+5.	Client yang terkoneksi ke server pembeli hanya bisa mengurangi stok
+    - Cara mengurangi stok: client yang terkoneksi ke server pembeli mengirim string “beli” ke server lalu stok berkurang 1
+6.	Server pembeli akan mengirimkan info ke client yang terhubung dengannya apakah transaksi berhasil atau tidak berdasarkan ketersediaan stok
+    -	Jika stok habis maka client yang terkoneksi ke server pembeli akan mencetak “transaksi gagal”
+    -	Jika stok masih ada maka client yang terkoneksi ke server pembeli akan mencetak “transaksi berhasil”
+7.	Server penjual akan mencetak stok saat ini setiap 5 detik sekali
+8.	Menggunakan thread, socket, shared memory
+
+**Jawaban**
+
+1. Buat program dibawah ini dengan nama file soal1.c di folder yang ditentukan.
+
+```c
+    //code
+```
+Penjelasan:
+```c
+    //code
+```
+//penjelasan
+```c
+    //code
+```
+//penjelasan
+```c
+    //code
+```
+//penjelasan
+
+2. Lalu compile file tadi dan jalankan di terminal
+
+3. Lakukan simulasi test. Buat file dengan owner dan groupname sesuai soal, maka hasilnya akan terhapus.
+
+---
+
+## NO 3
+
+Agmal dan Iraj merupakan 2 sahabat yang sedang kuliah dan hidup satu kostan, sayangnya mereka mempunyai gaya hidup yang berkebalikan, dimana Iraj merupakan laki-laki yang sangat sehat,rajin berolahraga dan bangun tidak pernah kesiangan sedangkan Agmal hampir menghabiskan setengah umur hidupnya hanya untuk tidur dan ‘ngoding’. Dikarenakan mereka sahabat yang baik, Agmal dan iraj sama-sama ingin membuat satu sama lain mengikuti gaya hidup mereka dengan cara membuat Iraj sering tidur seperti Agmal, atau membuat Agmal selalu bangun pagi seperti Iraj. Buatlah suatu program C untuk menggambarkan kehidupan mereka dengan spesifikasi sebagai berikut:
+1.	Terdapat 2 karakter Agmal dan Iraj
+2.	Kedua karakter memiliki status yang unik
+    - Agmal mempunyai WakeUp_Status, di awal program memiliki status 0
+    - Iraj memiliki Spirit_Status, di awal program memiliki status 100
+    - Terdapat 3 Fitur utama  
+        ● All Status, yaitu menampilkan status kedua sahabat  
+            Ex: Agmal WakeUp_Status = 75  
+                Iraj Spirit_Status = 30  
+        ● “Agmal Ayo Bangun” menambah WakeUp_Status Agmal sebesar 15 point  
+        ● “Iraj Ayo Tidur” mengurangi Spirit_Status Iraj sebanyak 20 point
+    - Terdapat Kasus yang unik dimana:  
+        ● Jika Fitur “Agmal Ayo Bangun” dijalankan sebanyak 3 kali, maka Fitur “Iraj Ayo Tidur” Tidak bisa dijalankan selama 10 detik (Dengan mengirim pesan ke sistem “Fitur Iraj Ayo Tidur disabled 10 s”)  
+        ● Jika Fitur  “Iraj Ayo Tidur” dijalankan sebanyak 3 kali, maka Fitur “Agmal Ayo Bangun” Tidak bisa dijalankan selama 10 detik (Dengan mengirim pesan ke sistem “Agmal Ayo Bangun disabled 10 s”)
+    - Program akan berhenti jika Salah Satu :  
+        ● WakeUp_Status Agmal >= 100 (Tampilkan Pesan “Agmal Terbangun,mereka bangun pagi dan berolahraga”)  
+        ● Spirit_Status Iraj <= 0 (Tampilkan Pesan “Iraj ikut tidur, dan bangun kesiangan bersama Agmal”)
+    - Syarat Menggunakan Lebih dari 1 Thread
+
+**Jawaban**
+
+1. Buat program dibawah ini dengan nama file soal1.c di folder yang ditentukan.
+
+```c
+    //code
+```
+Penjelasan:
+```c
+    //code
+```
+//penjelasan
+```c
+    //code
+```
+//penjelasan
+```c
+    //code
+```
+//penjelasan
+
+2. Lalu compile file tadi dan jalankan di terminal
+
+3. Hasil dapat dilihat di daftar.txt
+
+---
+
+## NO 4
+
+Buatlah sebuah program C dimana dapat menyimpan list proses yang sedang berjalan (ps -aux) maksimal 10 list proses. Dimana awalnya list proses disimpan dalam di 2 file ekstensi .txt yaitu  SimpanProses1.txt di direktori /home/Document/FolderProses1 dan SimpanProses2.txt di direktori /home/Document/FolderProses2 , setelah itu masing2 file di  kompres zip dengan format nama file KompresProses1.zip dan KompresProses2.zip dan file SimpanProses1.txt dan SimpanProses2.txt akan otomatis terhapus, setelah itu program akan menunggu selama 15 detik lalu program akan mengekstrak kembali file KompresProses1.zip dan KompresProses2.zip  
+Dengan Syarat :
+- Setiap list proses yang di simpan dalam masing-masing file .txt harus berjalan bersama-sama
+- Ketika mengkompres masing-masing file .txt harus berjalan bersama-sama
+- Ketika Mengekstrak file .zip juga harus secara bersama-sama
+- Ketika Telah Selesai melakukan kompress file .zip masing-masing file, maka program akan memberi pesan “Menunggu 15 detik untuk mengekstrak kembali”
+- Wajib Menggunakan Multithreading
+- Boleh menggunakan system
+
+**Jawaban**
+
+1. Buat program dibawah ini dengan nama file soal1.c di folder yang ditentukan.
+
+```c
+    //code
+```
+Penjelasan:
+```c
+    //code
+```
+//penjelasan
+```c
+    //code
+```
+//penjelasan
+```c
+    //code
+```
+//penjelasan
+
+2. Lalu compile file tadi dan jalankan di terminal
+
+3. Lakukan simulasi test. Lewat terminal command `touch -a /home/[user]/Documents/makanan/makan_enak.txt`. Tak berapa lama akan muncul makan_sehat#.txt.
+
+---
+
+## NO 5
+
+Angga, adik Jiwang akan berulang tahun yang ke sembilan pada tanggal 6 April besok. Karena lupa menabung, Jiwang tidak mempunyai uang sepeserpun untuk membelikan Angga kado. Kamu sebagai sahabat Jiwang ingin membantu Jiwang membahagiakan adiknya sehingga kamu menawarkan bantuan membuatkan permainan komputer sederhana menggunakan program C. Jiwang sangat menyukai idemu tersebut. Berikut permainan yang Jiwang minta.  
+- Pemain memelihara seekor monster lucu dalam permainan. Pemain dapat  memberi nama pada monsternya.
+- Monster pemain memiliki hunger status yang berawal dengan nilai 200 (maksimalnya) dan nanti akan berkurang 5 tiap 10 detik.Ketika hunger status mencapai angka nol, pemain akan kalah. Hunger status dapat bertambah 15 apabila pemain memberi makan kepada monster, tetapi banyak makanan terbatas dan harus beli di Market.
+- Monster pemain memiliki hygiene status yang berawal dari 100 dan nanti berkurang 10 tiap 30 detik. Ketika hygiene status mencapai angka nol, pemain akan kalah. Hygiene status' dapat bertambah 30 hanya dengan memandikan monster. Pemain dapat memandikannya setiap 20 detik(cooldownnya 20 detik).
+- Monster pemain memiliki health status yang berawal dengan nilai 300. Variabel ini bertambah (regenerasi)daa 5 setiap 10 detik ketika monster dalam keadaan standby.
+- Monster pemain dapat memasuki keadaan battle. Dalam keadaan ini, food status(fitur b), hygiene status'(fitur c), dan ‘regenerasi’(fitur d) tidak akan berjalan. Health status dari monster dimulai dari darah saat monster pemain memasuki battle. Monster pemain akan bertarung dengan monster NPC yang memiliki darah 100. Baik monster pemain maupun NPC memiliki serangan sebesar 20. Monster pemain dengan monster musuh akan menyerang secara bergantian. 
+- Fitur shop, pemain dapat membeli makanan sepuas-puasnya selama stok di toko masih tersedia.  
+    * Pembeli (terintegrasi dengan game)
+        - Dapat mengecek stok makanan yang ada di toko.
+        - Jika stok ada, pembeli dapat membeli makanan.
+    * Penjual (terpisah)
+        - Bisa mengecek stok makanan yang ada di toko
+        - Penjual dapat menambah stok makanan.
+
+Spesifikasi program:  
+- Program mampu mendeteksi input berupa key press. (Program bisa berjalan tanpa perlu menekan tombol enter)
+- Program terdiri dari 3 scene yaitu standby, battle, dan shop.
+- Pada saat berada di standby scene, program selalu menampilkan health status, hunger status, hygiene status, stok makanan tersisa, dan juga status kamar mandi (“Bath is ready” jika bisa digunakan, “Bath will be ready in [bath cooldown]s” jika sedang cooldown). Selain itu program selalu menampilkan 5 menu, yaitu memberi makan, mandi, battle, shop, dan exit. Contoh :
+
+Standby Mode  
+Health : [health status]  
+Hunger : [hunger status]  
+Hygiene : [hygiene status]  
+Food left : [your food stock]  
+Bath will be ready in [cooldown]s  
+Choices
+1.	Eat
+2.	Bath
+3.	Battle
+4.	Shop
+5.	Exit
+
+- Pada saat berada di battle scene, program selalu menampilkan health status milik pemain dan monster NPC. Selain itu, program selalu menampilkan 2 menu yaitu serang atau lari. Contoh :
+
+Battle Mode  
+Monster’s Health : [health status]  
+Enemy’s Health : [enemy health status]  
+Choices
+1.	Attack
+2.	Run
+
+- Pada saat berada di shop scene versi pembeli, program selalu menampilkan food stock toko dan milik pemain. Selain itu, program selalu menampilkan 2 menu yaitu beli dan kembali ke standby scene. Contoh :
+
+Shop Mode  
+Shop food stock : [shop food stock]  
+Your food stock : [your food stock]  
+Choices
+1.	Buy
+2.	Back
+
+- Pada program penjual, program selalu menampilkan food stock toko. Selain itu, program juga menampilkan 2 menu yaitu restock dan exit. Contoh :
+
+Shop  
+Food stock : [shop food stock]  
+Choices
+1.	Restock
+2.	Exit
+
+- Pastikan terminal hanya mendisplay status detik ini sesuai scene terkait (hint: menggunakan system(“clear”))
+
+**Jawaban**
+
+1. Buat program dibawah ini dengan nama file soal1.c di folder yang ditentukan.
+
+```c
+    //code
+```
+Penjelasan:
+```c
+    //code
+```
+//penjelasan
+```c
+    //code
+```
+//penjelasan
+```c
+    //code
+```
+//penjelasan
+
+3. Lalu compile kedua file tadi dan jalankan yang pertama di terminal.
+
+4. Lakukan simulasi test. File yang muncul pada folder yang terkait setiap 30 menit sebanyak 30 untuk hasil benarnya program pertama.
+
+---
+
+## Referensi
