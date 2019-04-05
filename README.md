@@ -169,6 +169,8 @@ Pada suatu hari ada orang yang ingin berjualan 1 jenis barang secara private, di
 
 **Jawaban**
 
+[Maaf belum terselesaikan, permasalahannya bingung memodelkan masalahnya dan belum sempat memahami menyeluruh karena minimnya penjelasan]
+
 1. Buat program dibawah ini dengan nama file soal2.c di folder yang ditentukan.
 
 ```c
