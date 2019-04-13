@@ -171,7 +171,7 @@ Pada suatu hari ada orang yang ingin berjualan 1 jenis barang secara private, di
 
 [Maaf belum terselesaikan, permasalahannya bingung memodelkan masalahnya dan belum sempat memahami menyeluruh karena minimnya penjelasan]
 
-1. Buat program dibawah ini dengan nama file soal2.c di folder yang ditentukan.
+1. Buat program dibawah ini dengan nama file soal2s1.c di folder yang ditentukan.
 
 ```c
     //code
@@ -190,9 +190,66 @@ Penjelasan:
 ```
 //penjelasan
 
-2. Lalu compile file tadi dengan `-pthread` dan jalankan di terminal
+2. Buat program dibawah ini dengan nama file soal2c1.c di folder yang ditentukan.
 
-3. Lakukan simulasi test dengan membuka multi-terminal.
+```c
+    //code
+```
+Penjelasan:
+```c
+    //code
+```
+//penjelasan
+```c
+    //code
+```
+//penjelasan
+```c
+    //code
+```
+//penjelasan
+
+3. Buat program dibawah ini dengan nama file soal2s2.c di folder yang ditentukan.
+
+```c
+    //code
+```
+Penjelasan:
+```c
+    //code
+```
+//penjelasan
+```c
+    //code
+```
+//penjelasan
+```c
+    //code
+```
+//penjelasan
+
+4. Buat program dibawah ini dengan nama file soal2c2.c di folder yang ditentukan.
+
+```c
+    //code
+```
+Penjelasan:
+```c
+    //code
+```
+//penjelasan
+```c
+    //code
+```
+//penjelasan
+```c
+    //code
+```
+//penjelasan
+
+5. Lalu compile file soal2s1.c dan soal2c1.c tadi dengan `-pthread` dan jalankan di terminal dengan urutan soal2s1.c, soal2c1.c, soal2s2.c dan soal2c2.c.
+
+6. Lakukan simulasi test dengan membuka multi-terminal.
 
 ---
 
@@ -914,7 +971,7 @@ Choices
 
 **Jawaban**
 
-1. Buat program dibawah ini dengan nama file soal5.c di folder yang ditentukan.
+1. Buat program dibawah ini dengan nama file soal5.c di folder yang ditentukan sebagai program game.
 
 ```c
 #include <stdio.h>
@@ -922,9 +979,11 @@ Choices
 #include <pthread.h>
 #include <stdlib.h>
 #include <termios.h>
-#include <time.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 pthread_t tid[50];
+key_t kunci = 1400;
 
 //status
 int* hunger;  
@@ -933,6 +992,7 @@ int* health;
 int* bath;
 int* food;
 int* item;
+int shmidd;
 
 //name
 char name[50];
@@ -962,13 +1022,19 @@ int main()
     health=malloc(sizeof(int*));
     bath=malloc(sizeof(int*));
     food=malloc(sizeof(int*));
-    item=malloc(sizeof(int*));
+    // item=malloc(sizeof(int*));
     *hunger=200;
     *hygiene=100;
     *health=300;
     *bath=20;
     *food=0;
-    *item=0;
+    // *item=0;
+    // int *value;
+    int shmid = shmget(kunci, sizeof(int), IPC_CREAT | 0666);
+    shmidd = shmid;
+    item = shmat(shmid,NULL,0);
+    //init stok
+    *item = 5;
     tControl(0,0);
     //main program
     char menu='2';
@@ -1039,7 +1105,7 @@ void* tHunger(void* arv)
         if (*hu-5 > 0)
         {
             *hu=*hu-5;
-            sleep(10);
+            sleep(10);    
         }
         else if (*hu > 200)
             *hu=200;
@@ -1047,6 +1113,9 @@ void* tHunger(void* arv)
         {
             printf("\nKalah karena hunger 0");
             exit(1);
+            //detach
+            shmdt(item);
+            shmctl(shmidd, IPC_RMID, NULL);
         }
     }
 }
@@ -1058,12 +1127,15 @@ void* tHygiene(void* arv)
         if (*hy-10 > 0)
         {
             *hy=*hy-10;
-            sleep(30);
+            sleep(30);    
         }
         else
         {
             printf("\nKalah karena hygiene 0");
             exit(2);
+            //detach
+            shmdt(item);
+            shmctl(shmidd, IPC_RMID, NULL);
         }
     }
 }
@@ -1088,7 +1160,8 @@ void* tBath(void* arv)
         }
     }
 }
-char standbyMode(){
+char standbyMode()
+{
     while(1)
     {
         system("clear");
@@ -1130,7 +1203,12 @@ char standbyMode(){
             return c;
         }
         else if (c=='5')
+        {
             exit(3);
+            //detach memory
+            shmdt(item);
+            shmctl(shmidd, IPC_RMID, NULL);
+        }
     } 
 }
 char battleMode()
@@ -1148,6 +1226,9 @@ char battleMode()
         {
             printf("Kalah karena health 0\n");
             exit(4);
+            //detach memory
+            shmdt(item);
+            shmctl(shmidd, IPC_RMID, NULL);
         }
         system("clear");
         printf("Battle Mode\n");
@@ -1174,69 +1255,30 @@ char shopMode()
     while(1)
     {
         system("clear");
-        printf("Choose Role Shop Mode\n");
+        printf("Shop Mode\n");
+        printf("Shop food stock\t: %d\n",*item);
+        printf("Your food stock\t: %d\n",*food);
         printf("Choices\n");
-        printf("1. Pembeli\n2. Penjual\n");
-        char d;
-        d=getch();
-        //pembeli
-        if (d=='1')
+        printf("1. Buy\n2. Back\n");
+        char c;
+        c=getch();
+        if (c=='1')
         {
-            int items;
-            srand(time(NULL));
-            items=rand()%10+1;
-            while(1)
+            if (*item - 1 >= 0)
             {
-                system("clear");
-                printf("Shop Mode\n");
-                printf("Shop food stock\t: %d\n",items);
-                printf("Your food stock\t: %d\n",*food);
-                printf("Choices\n");
-                printf("1. Buy\n2. Back\n");
-                char c;
-                c=getch();
-                if (c=='1')
-                {
-                    if (items - 1 >= 0)
-                    {
-                        items--;
-                        *food=*food+1;   
-                    }
-                }
-                else if (c=='2')
-                {
-                    tControl(2,0);
-                    return c;
-                }
+                *item-=1;
+                *food=*food+1;   
             }
         }
-        //penjual
-        else if (d=='2')
+        else if (c=='2')
         {
-            while(1)
-            {
-                system("clear");
-                printf("Shop\n");
-                printf("Food stock\t: %d\n",*item);
-                printf("Choices\n");
-                printf("1. Restock\n2. Exit\n");
-                char c;
-                c=getch();
-                if (c=='1')
-                {
-                    if (*food - 1 >= 0)
-                    {
-                        *item=*item+1;
-                        *food=*food-1;   
-                    }
-                }
-                else if (c=='2')
-                    exit(5);
-            }
+            tControl(2,0);
+            return c;
         }
     }
 }
 ```
+//belum
 Penjelasan:
 ```c
 #include <stdio.h>
@@ -1580,8 +1622,78 @@ char shopMode()
     }
 }
 ```
-Fungsi mencetak menu sesuai soal berdasarkan role pembeli atau penjual. Nilai yang dikembalikan akan digunakan kembali pada main program.
+Fungsi mencetak menu sesuai soal berdasarkan role pembeli. Nilai yang dikembalikan akan digunakan kembali pada main program.
 
-2. Lalu compile file tadi dengan `-pthread` dan jalankan di terminal
+2. Lalu buat program penjual dengan nama soal52.c di folder yang ditentukan seperti berikut.
 
-3. Lakukan simulasi test dengan semua fitur mode yang ada.
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <termios.h>
+#include <unistd.h>
+
+key_t kunci = 1400;
+
+/* reads from keypress, doesn't echo */
+int getch(void);
+
+int main()
+{
+    int *item;
+    int shmid = shmget(kunci, sizeof(int), IPC_CREAT | 0666);
+    item = shmat(shmid,NULL,0);
+    while(1)
+    {
+        system("clear");
+        printf("Shop\n");
+        printf("Food stock\t: %d\n",*item);
+        printf("Choices\n");
+        printf("1. Restock\n2. Exit\n");
+        char c;
+        c=getch();
+        if (c=='1')
+        {
+            *item+=1;
+        }
+        else if (c=='2')
+        {
+            shmdt(item);
+            shmctl(shmid, IPC_RMID, NULL);
+            exit(5);
+        }
+    }
+    return 0;
+}
+
+int getch(void)
+{
+    struct termios oldattr, newattr;
+    int ch;
+    tcgetattr( STDIN_FILENO, &oldattr );
+    newattr = oldattr;
+    newattr.c_lflag &= ~( ICANON | ECHO );
+    tcsetattr( STDIN_FILENO, TCSANOW, &newattr );
+    ch = getchar();
+    tcsetattr( STDIN_FILENO, TCSANOW, &oldattr );
+    return ch;
+}
+```
+//penjelasan
+```c
+//code
+```
+//penjelasan
+```c
+//code
+```
+//penjelasan
+```c
+//code
+```
+//penjelasan
+
+3. Lalu compile semua file dengan `-pthread` dan jalankan yang pertama lalu kedua di terminal.
+
+4. Lakukan simulasi test dengan semua fitur mode yang ada.

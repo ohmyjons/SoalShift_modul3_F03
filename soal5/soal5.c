@@ -3,9 +3,11 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <termios.h>
-#include <time.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 pthread_t tid[50];
+key_t kunci = 1400;
 
 //status
 int* hunger;  
@@ -14,6 +16,7 @@ int* health;
 int* bath;
 int* food;
 int* item;
+int shmidd;
 
 //name
 char name[50];
@@ -43,13 +46,19 @@ int main()
     health=malloc(sizeof(int*));
     bath=malloc(sizeof(int*));
     food=malloc(sizeof(int*));
-    item=malloc(sizeof(int*));
+    // item=malloc(sizeof(int*));
     *hunger=200;
     *hygiene=100;
     *health=300;
     *bath=20;
     *food=0;
-    *item=0;
+    // *item=0;
+    // int *value;
+    int shmid = shmget(kunci, sizeof(int), IPC_CREAT | 0666);
+    shmidd = shmid;
+    item = shmat(shmid,NULL,0);
+    //init stok
+    *item = 5;
     tControl(0,0);
     //main program
     char menu='2';
@@ -128,6 +137,9 @@ void* tHunger(void* arv)
         {
             printf("\nKalah karena hunger 0");
             exit(1);
+            //detach
+            shmdt(item);
+            shmctl(shmidd, IPC_RMID, NULL);
         }
     }
 }
@@ -145,6 +157,9 @@ void* tHygiene(void* arv)
         {
             printf("\nKalah karena hygiene 0");
             exit(2);
+            //detach
+            shmdt(item);
+            shmctl(shmidd, IPC_RMID, NULL);
         }
     }
 }
@@ -169,7 +184,8 @@ void* tBath(void* arv)
         }
     }
 }
-char standbyMode(){
+char standbyMode()
+{
     while(1)
     {
         system("clear");
@@ -211,7 +227,12 @@ char standbyMode(){
             return c;
         }
         else if (c=='5')
+        {
             exit(3);
+            //detach memory
+            shmdt(item);
+            shmctl(shmidd, IPC_RMID, NULL);
+        }
     } 
 }
 char battleMode()
@@ -229,6 +250,9 @@ char battleMode()
         {
             printf("Kalah karena health 0\n");
             exit(4);
+            //detach memory
+            shmdt(item);
+            shmctl(shmidd, IPC_RMID, NULL);
         }
         system("clear");
         printf("Battle Mode\n");
@@ -255,65 +279,25 @@ char shopMode()
     while(1)
     {
         system("clear");
-        printf("Choose Role Shop Mode\n");
+        printf("Shop Mode\n");
+        printf("Shop food stock\t: %d\n",*item);
+        printf("Your food stock\t: %d\n",*food);
         printf("Choices\n");
-        printf("1. Pembeli\n2. Penjual\n");
-        char d;
-        d=getch();
-        //pembeli
-        if (d=='1')
+        printf("1. Buy\n2. Back\n");
+        char c;
+        c=getch();
+        if (c=='1')
         {
-            int items;
-            srand(time(NULL));
-            items=rand()%10+1;
-            while(1)
+            if (*item - 1 >= 0)
             {
-                system("clear");
-                printf("Shop Mode\n");
-                printf("Shop food stock\t: %d\n",items);
-                printf("Your food stock\t: %d\n",*food);
-                printf("Choices\n");
-                printf("1. Buy\n2. Back\n");
-                char c;
-                c=getch();
-                if (c=='1')
-                {
-                    if (items - 1 >= 0)
-                    {
-                        items--;
-                        *food=*food+1;   
-                    }
-                }
-                else if (c=='2')
-                {
-                    tControl(2,0);
-                    return c;
-                }
+                *item-=1;
+                *food=*food+1;   
             }
         }
-        //penjual
-        else if (d=='2')
+        else if (c=='2')
         {
-            while(1)
-            {
-                system("clear");
-                printf("Shop\n");
-                printf("Food stock\t: %d\n",*item);
-                printf("Choices\n");
-                printf("1. Restock\n2. Exit\n");
-                char c;
-                c=getch();
-                if (c=='1')
-                {
-                    if (*food - 1 >= 0)
-                    {
-                        *item=*item+1;
-                        *food=*food-1;   
-                    }
-                }
-                else if (c=='2')
-                    exit(5);
-            }
+            tControl(2,0);
+            return c;
         }
     }
 }
